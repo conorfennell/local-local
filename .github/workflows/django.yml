@@ -35,15 +35,16 @@ jobs:
         ssh -o StrictHostKeyChecking=no root@${{ secrets.IP_ADDRESS }} << 'EOF'
           set -e
           echo "Pulling latest code from GitHub..."
-          if [ ! -d ./local-local]; then
-            git clone https://github.com/conorfennell/local-local.git ./local-local
+          if [ ! -d /root/local-local]; then
+            mkdir /root/local-local
+            git clone https://github.com/conorfennell/local-local.git /root/local-local
           else
-            cd ./local-local
+            cd /root/local-local
             git fetch --all
             git reset --hard origin/main
           fi
           
           echo "Building the project..."
-          cd ./local-local
+          cd /root/local-local
           docker compose up # Replace with your actual build script or commands
         EOF
