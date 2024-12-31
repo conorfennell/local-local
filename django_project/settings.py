@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "168.119.116.228",
+    "atyourblock.com"
 ]
 
 
