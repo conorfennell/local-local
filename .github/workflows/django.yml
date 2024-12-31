@@ -24,3 +24,24 @@ jobs:
     - name: Install Dependencies
       run: |
         pip install -r ./requirements.txt
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy to Hetzner
+      run: |
+        ssh -o StrictHostKeyChecking=no root@${{ secrets.IP_ADDRESS }} << 'EOF'
+          set -e
+          echo "Pulling latest code from GitHub..."
+          if [ ! -d ./local-local]; then
+            git clone https://github.com/conorfennell/local-local.git ./local-local
+          else
+            cd ./local-local
+            git fetch --all
+            git reset --hard origin/main
+          fi
+          
+          echo "Building the project..."
+          cd ./local-local
+          docker compose up # Replace with your actual build script or commands
+        EOF
