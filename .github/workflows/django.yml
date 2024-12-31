@@ -46,5 +46,5 @@ jobs:
           
           echo "Building the project..."
           cd /root/local-local
-          docker compose up # Replace with your actual build script or commands
+          docker-compose up --build -d # Replace with your actual build script or commands
         EOF
