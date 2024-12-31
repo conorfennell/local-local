@@ -35,7 +35,7 @@ jobs:
         ssh -o StrictHostKeyChecking=no root@${{ secrets.IP_ADDRESS }} << 'EOF'
           set -e
           echo "Pulling latest code from GitHub..."
-          if [ ! -d /root/local-local]; then
+          if [ ! -d /root/local-local ]; then
             mkdir /root/local-local
             git clone https://github.com/conorfennell/local-local.git /root/local-local
           else
