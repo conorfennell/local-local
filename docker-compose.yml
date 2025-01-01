@@ -4,4 +4,8 @@ services:
     ports:
       - "80:8000"
     volumes:
-      - .:/app
+     - ./extraction:/app/extraction
+  extract:
+    build: ./extract_scripts
+    volumes:
+      - ./extraction:/app/extraction

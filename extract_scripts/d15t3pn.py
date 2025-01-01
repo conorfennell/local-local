@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import time
 import json
 import re
 from datetime import datetime, timedelta, timezone
@@ -8,8 +7,9 @@ from datetime import datetime, timedelta, timezone
 def parse_castleknock_website():
     url = "https://www.castleknockcommunitycentre.ie/adults.html"
     extracted_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-    eircode = "d153tpn"
-
+    eircode = "d15t3pn"
+    longitude=53.37743855202611
+    latitude=-6.378832062945247
     try:
         # Send a GET request to the website
         response = requests.get(url)
@@ -89,7 +89,9 @@ def parse_castleknock_website():
                         "extracted_time": extracted_time,
                         "extracted_url": url,
                         "duration": duration.strip(),
-                        "eircode": eircode
+                        "eircode": eircode,
+                        "longitude": longitude,
+                        "latitude": latitude
                     })
 
         print(json.dumps(activities, indent=4))
