@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
+import schedule
+import time
 from datetime import datetime, timedelta, timezone
 
 def parse_castleknock_website():
@@ -110,7 +112,14 @@ def parse_castleknock_website():
         print("Error parsing the website:", e)
 
 
+
+
 # Keep the script running
 if __name__ == "__main__":
     print("Starting the recurring script...")
     parse_castleknock_website()
+    schedule.every(6).hours.do(parse_castleknock_website)
+    while True:
+        schedule.run_pending()
+        print("pending")
+        time.sleep(10)
