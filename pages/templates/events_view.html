@@ -46,6 +46,13 @@
         button:hover {
             background: #1976d2;
         }
+        .location-header {
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -62,6 +69,7 @@
         {% autoescape off %}
         const events = {{ events }};
         {% endautoescape %}
+        
         // Initialize map
         const map = L.map('map').setView([53.37743855202611, -6.378832062945247], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -69,21 +77,6 @@
         }).addTo(map);
 
         const markers = L.layerGroup().addTo(map);
-
-        function parseISO8601Duration(duration) {
-            if (duration === "Unknown") return "Duration unknown";
-            const matches = duration.match(/PT(\d+H)?(\d+M)?/);
-            if (!matches) return duration;
-            
-            const hours = matches[1] ? parseInt(matches[1]) : 0;
-            const minutes = matches[2] ? parseInt(matches[2]) : 0;
-            
-            let result = [];
-            if (hours) result.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-            if (minutes) result.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
-            
-            return result.join(' and ');
-        }
 
         function formatEventTime(timeString) {
             try {
@@ -107,110 +100,133 @@
             markers.clearLayers();
         }
 
-        function addMarker(event, isNext = false) {
-            // Check if coordinates are valid
-            if (!event.longitude || !event.latitude || 
-                Math.abs(event.longitude) > 90 || Math.abs(event.latitude) > 180) {
-                console.error('Invalid coordinates for event:', event.name);
-                return;
-            }
-
-            const marker = L.marker([event.longitude, event.latitude])
-                .bindPopup(`
-                    <strong>${event.name}</strong><br>
-                    Time: ${formatEventTime(event.start_time)}<br>
-                    Duration: ${parseISO8601Duration(event.duration)}<br>
-                    ${isNext ? '<strong>Next Event!</strong>' : ''}
-                `);
+        function addLocationMarker(location, events) {
+            console.log("Adding marker at:", location);
+            const marker = L.marker([location.lat, location.lng])
+                .bindPopup(
+                    events.map(event => `
+                        <strong>${event.name}</strong><br>
+                        ${formatEventTime(event.start_time)}<br>
+                    `).join('<hr>')
+                );
             markers.addLayer(marker);
         }
 
-        function createEventElement(event, isNext = false) {
-            const div = document.createElement('div');
-            div.className = 'event-item' + (isNext ? ' next' : '');
-            
-            // Filter out events with empty names
-            if (!event.name.trim()) return null;
-
-            div.innerHTML = `
-                <strong>${event.name}</strong><br>
-                Time: ${formatEventTime(event.start_time)}<br>
-                Duration: ${parseISO8601Duration(event.duration)}
-                ${isNext ? '<br><strong>Next Event!</strong>' : ''}
-            `;
-            return div;
+        function showNextEvents() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = 
+        `Current Time: ${now.toLocaleString()}`;
+    
+    clearMarkers();
+    
+    // Group future events by location
+    const futureLocations = {};
+    events.forEach(event => {
+        const eventTime = new Date(event.start_time);
+        if (eventTime > now) {
+            // Swap the order here to match correct mapping format
+            const key = `${event.longitude},${event.latitude}`;
+            if (!futureLocations[key]) {
+                futureLocations[key] = {
+                    lat: event.longitude, // This is actually the latitude
+                    lng: event.latitude,  // This is actually the longitude
+                    events: []
+                };
+            }
+            futureLocations[key].events.push(event);
         }
+    });
 
-        function updateEventList(events, nextEvent = null) {
+    // Sort events at each location by time
+    Object.values(futureLocations).forEach(location => {
+        location.events.sort((a, b) => 
+            new Date(a.start_time) - new Date(b.start_time)
+        );
+    });
+
+    // Add markers for each location
+    Object.values(futureLocations).forEach(location => {
+        // When adding the marker, use the correct order
+        const marker = L.marker([location.lat, location.lng])
+            .bindPopup(
+                location.events.map(event => `
+                    <strong>${event.name}</strong><br>
+                    ${formatEventTime(event.start_time)}<br>
+                `).join('<hr>')
+            );
+        markers.addLayer(marker);
+    });
+
+    // Update event list
+    updateEventList(Object.values(futureLocations));
+}
+
+// Do the same fix for showCurrentEvents
+function showCurrentEvents() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = 
+        `Current Time: ${now.toLocaleString()}`;
+    
+    clearMarkers();
+    
+    // Group current events by location
+    const currentLocations = {};
+    events.forEach(event => {
+        const eventTime = new Date(event.start_time);
+        if (eventTime <= now) {
+            const key = `${event.longitude},${event.latitude}`;
+            if (!currentLocations[key]) {
+                currentLocations[key] = {
+                    lat: event.longitude,
+                    lng: event.latitude,
+                    events: []
+                };
+            }
+            currentLocations[key].events.push(event);
+        }
+    });
+
+    // Add markers for each location
+    Object.values(currentLocations).forEach(location => {
+        const marker = L.marker([location.lat, location.lng])
+            .bindPopup(
+                location.events.map(event => `
+                    <strong>${event.name}</strong><br>
+                    ${formatEventTime(event.start_time)}<br>
+                `).join('<hr>')
+            );
+        markers.addLayer(marker);
+    });
+
+    // Update event list
+    updateEventList(Object.values(currentLocations));
+}
+
+        function updateEventList(locations) {
             const eventList = document.getElementById('eventList');
             eventList.innerHTML = '';
             
-            if (events.length === 0) {
+            if (locations.length === 0) {
                 eventList.innerHTML = '<div class="event-item">No events found</div>';
                 return;
             }
 
-            events.forEach(event => {
-                const eventElement = createEventElement(event, event === nextEvent);
-                if (eventElement) eventList.appendChild(eventElement);
+            locations.forEach(location => {
+                const locationHeader = document.createElement('div');
+                locationHeader.className = 'location-header';
+                locationHeader.textContent = `Location (${location.lat}, ${location.lng})`;
+                eventList.appendChild(locationHeader);
+
+                location.events.forEach(event => {
+                    const div = document.createElement('div');
+                    div.className = 'event-item';
+                    div.innerHTML = `
+                        <strong>${event.name}</strong><br>
+                        Time: ${formatEventTime(event.start_time)}
+                    `;
+                    eventList.appendChild(div);
+                });
             });
-        }
-
-        function filterValidEvents(events) {
-            return events.filter(event => {
-                const eventTime = new Date(event.start_time);
-                return !isNaN(eventTime.getTime()) && // Valid date
-                       event.name.trim() && // Has a name
-                       event.start_time.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/); // Valid ISO format
-            });
-        }
-
-        function showCurrentEvents() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = 
-                `Current Time: ${now.toLocaleString()}`;
-            
-            clearMarkers();
-            const validEvents = filterValidEvents(events);
-            const currentEvents = validEvents.filter(event => {
-                const eventTime = new Date(event.start_time);
-                const endTime = new Date(eventTime.getTime() + parseDuration(event.duration));
-                return eventTime <= now && endTime >= now;
-            });
-
-            currentEvents.forEach(event => addMarker(event));
-            updateEventList(currentEvents);
-        }
-
-        function parseDuration(duration) {
-            if (duration === "Unknown") return 3600000; // Default 1 hour
-            const matches = duration.match(/PT(\d+H)?(\d+M)?/);
-            if (!matches) return 3600000;
-            
-            const hours = matches[1] ? parseInt(matches[1]) : 0;
-            const minutes = matches[2] ? parseInt(matches[2]) : 0;
-            
-            return (hours * 3600000) + (minutes * 60000);
-        }
-
-        function showNextEvents() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = 
-                `Current Time: ${now.toLocaleString()}`;
-            
-            clearMarkers();
-            const validEvents = filterValidEvents(events);
-            const futureEvents = validEvents
-                .filter(event => new Date(event.start_time) > now)
-                .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-            
-            if (futureEvents.length > 0) {
-                const nextEvent = futureEvents[0];
-                addMarker(nextEvent, true);
-                updateEventList(futureEvents, nextEvent);
-            } else {
-                updateEventList([], null);
-            }
         }
 
         // Initialize with current events
