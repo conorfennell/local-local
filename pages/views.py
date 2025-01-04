@@ -25,7 +25,7 @@ def load_json_file(file_path):
 
 
 def home_age_view(request):
-    events = load_json_file("./extraction/d15t3pn.json")
+    events = load_json_file("./extraction/d15t3pn.json") + load_json_file("./extraction/d15p954.json")
     context = {
         'events': json.dumps(events)
     }

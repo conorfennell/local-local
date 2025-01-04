@@ -27,4 +27,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Run the Django development server
-CMD ["python", "d15t3pn.py"]
+CMD ["python", "schedule_extraction.py"]

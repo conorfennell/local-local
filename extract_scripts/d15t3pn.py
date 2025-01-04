@@ -2,8 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
-import schedule
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import logging
@@ -156,16 +154,3 @@ def parse_castleknock_website():
         
     except Exception as e:
         logger.error(f"Error: {e}")
-
-def main():
-    """Run parser on schedule."""
-    logger.info("Starting script...")
-    parse_castleknock_website()
-    
-    schedule.every(6).hours.do(parse_castleknock_website)
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
-
-if __name__ == "__main__":
-    main()
