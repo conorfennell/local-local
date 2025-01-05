@@ -4,23 +4,15 @@ FROM python:3.12-slim
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies with retry logic
+# Install system dependencies
 RUN set -eux; \
-    apt-get update -y; \
-    for i in $(seq 1 3); do \
-        apt-get install -y \
-        build-essential \
-        libpq-dev \
-        && break || { \
-            if [ $i -lt 3 ]; then \
-                sleep 5; \
-                apt-get update -y; \
-            else \
-                false; \
-            fi \
-        }; \
-    done; \
-    rm -rf /var/lib/apt/lists/*
+   echo "deb http://mirrors.ustc.edu.cn/debian bullseye main" > /etc/apt/sources.list \
+   && apt-get clean \
+   && apt-get update -o Acquire::CompressionTypes::Order::=gz \
+   && apt-get install -y --no-install-recommends \
+       build-essential \
+       libpq-dev \
+   && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt /app/
