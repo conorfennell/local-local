@@ -21,6 +21,6 @@ from pages import views
 
 urlpatterns = [
     path("privacy/", views.web_data_viewer),
-    path("", views.home_age_view),
+    path("", views.events_view),
     path("admin/", admin.site.urls),
 ]
