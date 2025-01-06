@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Community Events Map</title>
+    <title>Community Events Calendar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <style>
         * {
             margin: 0;
@@ -44,12 +45,24 @@
             font-size: 1rem;
         }
 
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
         #map {
             height: 600px;
-            width: 100%;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
+        }
+
+        #calendar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: 600px;
         }
 
         .controls {
@@ -100,81 +113,18 @@
             font-size: 0.95rem;
         }
 
-        .event-list {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            padding: 1.5rem;
-            max-height: 600px;
-            overflow-y: auto;
+        .fc-event {
+            cursor: pointer;
         }
 
-        .event-list::-webkit-scrollbar {
-            width: 8px;
+        .fc-event-title {
+            font-weight: 500;
         }
 
-        .event-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .event-list::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        .location-header {
-            font-weight: 600;
-            color: #2d3748;
-            padding: 1rem;
-            margin-top: 1rem;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-
-        .event-item {
-            padding: 1.25rem;
-            margin: 0.75rem 0;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: #ffffff;
-            transition: all 0.2s ease;
-        }
-
-        .event-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .event-item.next {
-            background-color: #ebf5ff;
-            border-color: #3b82f6;
-        }
-
-        .event-name {
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .event-time {
-            color: #6b7280;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .leaflet-popup-content {
-            font-family: 'Inter', sans-serif;
-            padding: 0.5rem;
-        }
-
-        .leaflet-popup-content strong {
-            color: #2d3748;
-            display: block;
-            margin-bottom: 0.25rem;
+        @media (max-width: 1024px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
@@ -197,11 +147,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Community Events Map</h1>
+            <h1>Community Events Calendar</h1>
             <p>Explore local events happening in your community</p>
         </div>
-        
-        <div id="map"></div>
         
         <div class="controls">
             <button onclick="showCurrentEvents()" class="btn-primary">
@@ -212,8 +160,11 @@
             </button>
             <span id="currentTime"></span>
         </div>
-        
-        <div class="event-list" id="eventList"></div>
+
+        <div class="content-wrapper">
+            <div id="map"></div>
+            <div id="calendar"></div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -223,13 +174,46 @@
         const events = {{ events }};
         {% endautoescape %}
         
-        // Initialize map with a more modern tile layer
+        // Initialize map
         const map = L.map('map').setView([53.37743855202611, -6.378832062945247], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors, © CARTO'
         }).addTo(map);
 
         const markers = L.layerGroup().addTo(map);
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: '100%',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: events.map(event => ({
+                title: event.name,
+                start: event.start_time,
+                location: `${event.longitude}, ${event.latitude}`,
+                extendedProps: {
+                    longitude: event.longitude,
+                    latitude: event.latitude
+                }
+            })),
+            eventClick: function(info) {
+                map.setView([info.event.extendedProps.longitude, info.event.extendedProps.latitude], 15);
+                markers.clearLayers();
+                const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude])
+                    .bindPopup(`<strong>${info.event.title}</strong><br>${info.event.start.toLocaleString()}`);
+                markers.addLayer(marker);
+                marker.openPopup();
+            }
+        });
+        
+            calendar.render();
+        });
 
         function formatEventTime(timeString) {
             try {
@@ -268,39 +252,6 @@
             markers.addLayer(marker);
         }
 
-        function updateEventList(locations) {
-            const eventList = document.getElementById('eventList');
-            eventList.innerHTML = '';
-            
-            if (locations.length === 0) {
-                eventList.innerHTML = '<div class="event-item">No events found</div>';
-                return;
-            }
-
-            locations.forEach(location => {
-                const locationHeader = document.createElement('div');
-                locationHeader.className = 'location-header';
-                locationHeader.textContent = `Location (${location.lat}, ${location.lng})`;
-                eventList.appendChild(locationHeader);
-
-                location.events.forEach(event => {
-                    const div = document.createElement('div');
-                    div.className = 'event-item';
-                    div.innerHTML = `
-                        <div class="event-name">${event.name}</div>
-                        <div class="event-time">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            ${formatEventTime(event.start_time)}
-                        </div>
-                    `;
-                    eventList.appendChild(div);
-                });
-            });
-        }
-
         function showNextEvents() {
             const now = new Date();
             document.getElementById('currentTime').textContent = 
@@ -330,8 +281,6 @@
                 );
                 addLocationMarker(location, location.events);
             });
-
-            updateEventList(Object.values(futureLocations));
         }
 
         function showCurrentEvents() {
@@ -360,8 +309,6 @@
             Object.values(currentLocations).forEach(location => {
                 addLocationMarker(location, location.events);
             });
-
-            updateEventList(Object.values(currentLocations));
         }
 
         // Initialize with current events
