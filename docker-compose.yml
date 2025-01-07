@@ -7,6 +7,10 @@ services:
      - ./extraction:/app/extraction
     environment:
       - COMMIT_ID
+    environment:
+      - COMMIT_ID
+      - COMMIT_TIME
+      - COMMIT_MESSAGE
   extract:
     build: ./extract_scripts
     volumes:
