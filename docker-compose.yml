@@ -5,6 +5,8 @@ services:
       - "80:8000"
     volumes:
      - ./extraction:/app/extraction
+    environment:
+      - COMMIT_ID
   extract:
     build: ./extract_scripts
     volumes:
