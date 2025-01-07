@@ -11,6 +11,28 @@
             padding: 0;
             background-color: #f4f4f9;
             color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            background-color: #0073e6;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .commit-info {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border-left: 5px solid #0073e6;
+            border-radius: 0 0 8px 8px;
+        }
+        .commit-info p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        .commit-info p strong {
+            color: #005bb5;
         }
         .container {
             max-width: 800px;
@@ -37,7 +59,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>Project Version Information</h1>
+        <div class="header">
+            <h1>Project Version Information</h1>
+        </div>
         <div class="commit-info">
             <p><strong>Commit ID:</strong> {{ commit_id }}</p>
             <p><strong>Commit Time:</strong> {{ commit_time }}</p>
