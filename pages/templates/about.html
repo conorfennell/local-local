@@ -46,15 +46,6 @@
             color: #0073e6;
             text-align: center;
         }
-        .commit-info {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e6f7ff;
-            border-left: 5px solid #0073e6;
-        }
-        .commit-info p {
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
@@ -62,7 +53,7 @@
         <div class="header">
             <h1>Project Version Information</h1>
         </div>
-        <div class="commit-info">
+        <div class="commit-info" style="margin-top: 20px; padding: 20px; background-color: #e6f7ff; border-left: 5px solid #0073e6; border-radius: 0 0 8px 8px;">
             <p><strong>Commit ID:</strong> {{ commit_id }}</p>
             <p><strong>Commit Time:</strong> {{ commit_time }}</p>
             <p><strong>Commit Message:</strong> {{ commit_message }}</p>
