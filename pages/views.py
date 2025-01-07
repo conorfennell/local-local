@@ -41,6 +41,10 @@ def events_view(request):
     return render(request, 'events_view.html', context)
 
 
+def about_view(request):
+    commit_id = os.getenv('COMMIT_ID', 'Unknown')
+    return render(request, 'about.html', {'commit_id': commit_id})
+
 def web_data_viewer(request):
     template = loader.get_template('web_data_viewer.html')
     return HttpResponse(template.render({}, request))
