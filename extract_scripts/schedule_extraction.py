@@ -1,18 +1,23 @@
 import schedule
 import time
 import logging
-import d15p954
-import d15t3pn
-import d15ca4v
+import importlib
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def parse_websites():
     logger.info("Starting script...")
-    d15p954.parse_castleknock_dublin_anglican()
-    d15t3pn.parse_castleknock_website()
-    d15ca4v.parse_laurel_lodge()
+    scripts = [
+        ("d15p954", "parse_castleknock_dublin_anglican"),
+        ("d15t3pn", "parse_castleknock_website"),
+        ("d15ca4v", "parse_laurel_lodge"),
+    ]
+
+    for module_name, function_name in scripts:
+        module = importlib.import_module(module_name)
+        func = getattr(module, function_name)
+        func()
 
 
 def main():
