@@ -113,7 +113,7 @@ class ChurchEventParser:
                 
         return events
 
-def parse_castleknock_dublin_anglican():
+def parse_d15p954():
     """Main function to fetch and parse website."""
     venue_config = {
         "url": "https://castleknock.dublin.anglican.org/events/",

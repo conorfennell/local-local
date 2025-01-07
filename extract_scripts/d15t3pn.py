@@ -119,7 +119,7 @@ class ActivityParser:
                         
         return activities
 
-def parse_castleknock_website():
+def parse_d15t3pn():
     """Main function to fetch and parse website."""
     venue_config = {
         "url": "https://www.castleknockcommunitycentre.ie/adults.html",

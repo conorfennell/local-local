@@ -119,7 +119,7 @@ class LaurelLodgeParser:
 
         return events
 
-def parse_laurel_lodge():
+def parse_d15ca4v():
     """Main function to fetch and parse website."""
     venue_config = {
         "url": "https://www.laurellodgeparish.ie/mass-times",
