@@ -34,6 +34,21 @@
     <p>This page demonstrates what types of browser data websites can access. All information stays local and is not sent anywhere.</p>
 
     <div class="box">
+        <h2>Geolocation</h2>
+        <pre id="geolocation">Loading...</pre>
+    </div>
+
+    <div class="box">
+        <h2>Battery Status</h2>
+        <pre id="battery-status">Loading...</pre>
+    </div>
+
+    <div class="box">
+        <h2>Network Information</h2>
+        <pre id="network-info">Loading...</pre>
+    </div>
+
+    <div class="box">
         <h2>Cookies (for this site only)</h2>
         <pre id="cookies">Loading...</pre>
     </div>
@@ -53,7 +68,60 @@
         <pre id="browser-info">Loading...</pre>
     </div>
 
+    <style>
+        .box {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
     <script>
+        // Geolocation
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('geolocation').textContent = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
+                },
+                (error) => {
+                    document.getElementById('geolocation').textContent = `Error: ${error.message}`;
+                }
+            );
+        } else {
+            document.getElementById('geolocation').textContent = "Geolocation is not supported by this browser.";
+        }
+
+        // Battery Status
+        if (navigator.getBattery) {
+            navigator.getBattery().then((battery) => {
+                const updateBatteryStatus = () => {
+                    document.getElementById('battery-status').textContent = `Level: ${battery.level * 100}%, Charging: ${battery.charging ? 'Yes' : 'No'}`;
+                };
+                updateBatteryStatus();
+                battery.addEventListener('levelchange', updateBatteryStatus);
+                battery.addEventListener('chargingchange', updateBatteryStatus);
+            });
+        } else {
+            document.getElementById('battery-status').textContent = "Battery status is not supported by this browser.";
+        }
+
+        // Network Information
+        if (navigator.connection) {
+            const updateNetworkInfo = () => {
+                document.getElementById('network-info').textContent = `Type: ${navigator.connection.effectiveType}, Downlink: ${navigator.connection.downlink}Mbps`;
+            };
+            updateNetworkInfo();
+            navigator.connection.addEventListener('change', updateNetworkInfo);
+        } else {
+            document.getElementById('network-info').textContent = "Network information is not supported by this browser.";
+        }
         // Display Cookies
         document.getElementById('cookies').textContent = document.cookie || "No cookies set for this site.";
 
