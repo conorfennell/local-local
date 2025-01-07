@@ -20,7 +20,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
-        h1 {
+        h1, h2 {
             color: #0073e6;
             text-align: center;
         }
@@ -37,10 +37,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>About Me</h1>
-        <p>Welcome to my professional developer portfolio. Here you can find the latest updates and commit details of my projects.</p>
+        <h1>Project Version Information</h1>
         <div class="commit-info">
-            <h2>Latest Commit Details</h2>
             <p><strong>Commit ID:</strong> {{ commit_id }}</p>
             <p><strong>Commit Time:</strong> {{ commit_time }}</p>
             <p><strong>Commit Message:</strong> {{ commit_message }}</p>
