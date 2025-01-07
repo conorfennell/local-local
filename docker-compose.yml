@@ -5,9 +5,6 @@ services:
       - "80:8000"
     volumes:
      - ./extraction:/app/extraction
-    environment:
-      - COMMIT_ID
-    environment:
       - COMMIT_ID
       - COMMIT_TIME
       - COMMIT_MESSAGE
