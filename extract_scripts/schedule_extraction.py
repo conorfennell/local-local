@@ -2,21 +2,19 @@ import schedule
 import time
 import logging
 import importlib
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def parse_websites():
     logger.info("Starting script...")
-    scripts = [
-        ("d15p954", "parse_castleknock_dublin_anglican"),
-        ("d15t3pn", "parse_castleknock_website"),
-        ("d15ca4v", "parse_laurel_lodge"),
-    ]
+    scripts_dir = Path(__file__).parent
+    scripts = [f.stem for f in scripts_dir.glob("d15*.py") if f.stem != "schedule_extraction"]
 
-    for module_name, function_name in scripts:
+    for module_name in scripts:
         module = importlib.import_module(module_name)
-        func = getattr(module, function_name)
+        func = getattr(module, f"parse_{module_name}")
         func()
 
 
