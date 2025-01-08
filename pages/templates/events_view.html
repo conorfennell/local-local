@@ -294,7 +294,8 @@
             const currentLocations = {};
             events.forEach(event => {
                 const eventTime = new Date(event.start_time);
-                if (eventTime <= now) {
+                const endTime = new Date(event.end_time);
+                if (eventTime <= now && endTime >= now) {
                     const key = `${event.longitude},${event.latitude}`;
                     if (!currentLocations[key]) {
                         currentLocations[key] = {
