@@ -157,7 +157,7 @@
                 Already Started
             </button>
             <button onclick="showNextEvents()" class="btn-secondary">
-                Upcoming Events
+                Next
             </button>
             <span id="currentTime"></span>
         </div>
@@ -280,7 +280,7 @@
                 location.events.sort((a, b) => 
                     new Date(a.start_time) - new Date(b.start_time)
                 );
-                addLocationMarker(location, location.events);
+                addLocationMarker(location, location.events.splice(0, 1));
             });
         }
 
