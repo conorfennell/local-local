@@ -183,7 +183,24 @@
 
         const markers = L.layerGroup().addTo(map);
 
-        // Initialize calendar
+        // Function to generate a random color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Assign colors to each location
+        const locationColors = {};
+        events.forEach(event => {
+            const key = `${event.longitude},${event.latitude}`;
+            if (!locationColors[key]) {
+                locationColors[key] = getRandomColor();
+            }
+        });
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -198,6 +215,8 @@
                 title: event.name,
                 start: event.start_time,
                 location: `${event.longitude}, ${event.latitude}`,
+                backgroundColor: locationColors[`${event.longitude},${event.latitude}`],
+                borderColor: locationColors[`${event.longitude},${event.latitude}`],
                 extendedProps: {
                     longitude: event.longitude,
                     latitude: event.latitude
@@ -206,7 +225,14 @@
             eventClick: function(info) {
                 map.setView([info.event.extendedProps.longitude, info.event.extendedProps.latitude], 15);
                 markers.clearLayers();
-                const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude])
+                const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color:${locationColors[info.event.extendedProps.longitude + ',' + info.event.extendedProps.latitude]};" class="marker-pin"></div>`,
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42]
+                    })
+                })
                     .bindPopup(`<strong>${info.event.title}</strong><br>${info.event.start.toLocaleString()}`);
                 markers.addLayer(marker);
                 marker.openPopup();
