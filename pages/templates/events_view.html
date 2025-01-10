@@ -227,7 +227,7 @@
                 markers.clearLayers();
                 const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude], {
                     icon: L.divIcon({
-                        html: '<i class="fas fa-map-marker-alt fa-3x" style="color: #FF0000;"></i>',
+                        html: `<i class="fas fa-map-marker-alt fa-3x" style="color: ${locationColors[info.event.extendedProps.longitude + ',' + info.event.extendedProps.latitude]};"></i>`,
                         className: 'custom-div-icon',
                         iconSize: [30, 42],
                         iconAnchor: [15, 42]
