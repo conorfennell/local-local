@@ -227,8 +227,8 @@
                 markers.clearLayers();
                 const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude], {
                     icon: L.divIcon({
+                        html: '<i class="fas fa-map-marker-alt fa-3x" style="color: #FF0000;"></i>',
                         className: 'custom-div-icon',
-                        html: `<div style="background-color:${locationColors[info.event.extendedProps.longitude + ',' + info.event.extendedProps.latitude]};" class="marker-pin"></div>`,
                         iconSize: [30, 42],
                         iconAnchor: [15, 42]
                     })
@@ -342,9 +342,6 @@
 
         // Initialize with current events
         showCurrentEvents();
-        
-        // Update every minute
-        setInterval(showCurrentEvents, 60000);
     </script>
 </body>
 </html>
