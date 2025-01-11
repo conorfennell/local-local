@@ -118,8 +118,9 @@ def parse_d15p954():
     venue_config = {
         "url": "https://castleknock.dublin.anglican.org/events/",
         "eircode": "d15p954",
-        "longitude":  53.37379251866193,
-        "latitude": -6.362814323860707
+        "latitude":  53.37379251866193,
+        "longitude":  -6.362814323860707
+        
     }
     
     output_dir = Path('./extraction')

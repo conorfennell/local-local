@@ -124,8 +124,8 @@ def parse_d15t3pn():
     venue_config = {
         "url": "https://www.castleknockcommunitycentre.ie/adults.html",
         "eircode": "d15t3pn",
-        "longitude":  53.37743855202611,
-        "latitude": -6.378832062945247
+        "latitude": 53.37743855202611,
+        "longitude":  -6.378832062945247
     }
     
     output_dir = Path('./extraction')

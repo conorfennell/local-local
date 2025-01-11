@@ -124,8 +124,8 @@ def parse_d15ca4v():
     venue_config = {
         "url": "https://www.laurellodgeparish.ie/mass-times",
         "eircode": "d15ca4v",
-        "longitude": 53.377527265212414,
-        "latitude": -6.376180701572852
+        "latitude": 53.377527265212414,
+        "longitude": -6.376180701572852,
     }
     
     output_dir = Path('./extraction')
