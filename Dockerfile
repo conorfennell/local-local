@@ -1,34 +1,51 @@
-# Use an official Python runtime as the base image
-FROM python:3.12-slim
+# Build stage
+FROM python:3.12-slim as builder
 
-# Set the working directory inside the container
+# Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN set -eux; \
-    echo "deb http://mirrors.ustc.edu.cn/debian bullseye main" > /etc/apt/sources.list \
-    && apt-get clean \
-    && apt-get update -o Acquire::CompressionTypes::Order::=gz \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Set build-time environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip wheel --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-# Copy the application code into the container
-COPY . /app/
+# Final stage
+FROM python:3.12-slim
 
-# Set environment variables
-# Prevents Python from writing .pyc files to disk
+WORKDIR /app
+
+# Set runtime environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
-# Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 
-# Expose port 8000
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libpq5 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy wheels from builder
+COPY --from=builder /app/wheels /wheels
+COPY --from=builder /app/requirements.txt .
+
+# Install dependencies from wheels
+RUN pip install --no-cache /wheels/*
+
+# Copy project files
+COPY . .
+
 EXPOSE 8000
 
-# Run the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
