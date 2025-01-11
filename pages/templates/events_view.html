@@ -51,10 +51,12 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
+            min-height: calc(100vh - 250px); /* Account for header and controls */
         }
 
         #map {
-            height: 600px;
+            height: 100%;
+            min-height: 600px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
@@ -64,7 +66,9 @@
             padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: 600px;
+            height: 100%;
+            min-height: 600px;
+            overflow: auto;
         }
 
         .controls {
