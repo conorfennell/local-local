@@ -263,17 +263,21 @@
                             lng: event.longitude,
                             events: []
                         };
+                        // Only add the first future event for this location
+                        futureLocations[key].events.push(event);
+                    } else {
+                        // If we find an earlier event for this location, replace the existing one
+                        const existingEventTime = new Date(futureLocations[key].events[0].start_time);
+                        if (eventTime < existingEventTime) {
+                            futureLocations[key].events = [event];
+                        }
                     }
-                    futureLocations[key].events.push(event);
                 }
             });
 
             const locations = Object.values(futureLocations);
             console.log('Future locations:', locations);
             locations.forEach(location => {
-                location.events.sort((a, b) => 
-                    new Date(a.start_time) - new Date(b.start_time)
-                );
                 console.log('Adding marker for location:', location);
                 mapManager.addLocationMarker(location, location.events);
             });
