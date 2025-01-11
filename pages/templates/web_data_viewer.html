@@ -84,71 +84,85 @@
         }
     </style>
     <script>
-        // Geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    document.getElementById('geolocation').textContent = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
-                },
-                (error) => {
-                    document.getElementById('geolocation').textContent = `Error: ${error.message}`;
-                }
-            );
-        } else {
-            document.getElementById('geolocation').textContent = "Geolocation is not supported by this browser.";
+        function showGeolocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('geolocation').textContent = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
+                    },
+                    (error) => {
+                        document.getElementById('geolocation').textContent = `Error: ${error.message}`;
+                    }
+                );
+            } else {
+                document.getElementById('geolocation').textContent = "Geolocation is not supported by this browser.";
+            }
         }
 
-        // Battery Status
-        if (navigator.getBattery) {
-            navigator.getBattery().then((battery) => {
-                const updateBatteryStatus = () => {
-                    document.getElementById('battery-status').textContent = `Level: ${battery.level * 100}%, Charging: ${battery.charging ? 'Yes' : 'No'}`;
+        function showBatteryStatus() {
+            if (navigator.getBattery) {
+                navigator.getBattery().then((battery) => {
+                    const updateBatteryStatus = () => {
+                        document.getElementById('battery-status').textContent = `Level: ${battery.level * 100}%, Charging: ${battery.charging ? 'Yes' : 'No'}`;
+                    };
+                    updateBatteryStatus();
+                    battery.addEventListener('levelchange', updateBatteryStatus);
+                    battery.addEventListener('chargingchange', updateBatteryStatus);
+                });
+            } else {
+                document.getElementById('battery-status').textContent = "Battery status is not supported by this browser.";
+            }
+        }
+
+        function showNetworkInfo() {
+            if (navigator.connection) {
+                const updateNetworkInfo = () => {
+                    document.getElementById('network-info').textContent = `Type: ${navigator.connection.effectiveType}, Downlink: ${navigator.connection.downlink}Mbps`;
                 };
-                updateBatteryStatus();
-                battery.addEventListener('levelchange', updateBatteryStatus);
-                battery.addEventListener('chargingchange', updateBatteryStatus);
-            });
-        } else {
-            document.getElementById('battery-status').textContent = "Battery status is not supported by this browser.";
+                updateNetworkInfo();
+                navigator.connection.addEventListener('change', updateNetworkInfo);
+            } else {
+                document.getElementById('network-info').textContent = "Network information is not supported by this browser.";
+            }
         }
 
-        // Network Information
-        if (navigator.connection) {
-            const updateNetworkInfo = () => {
-                document.getElementById('network-info').textContent = `Type: ${navigator.connection.effectiveType}, Downlink: ${navigator.connection.downlink}Mbps`;
-            };
-            updateNetworkInfo();
-            navigator.connection.addEventListener('change', updateNetworkInfo);
-        } else {
-            document.getElementById('network-info').textContent = "Network information is not supported by this browser.";
+        function showStorageInfo() {
+            // Display Cookies
+            document.getElementById('cookies').textContent = document.cookie || "No cookies set for this site.";
+
+            // Display Local Storage
+            const localStorageData = localStorage.length 
+                ? JSON.stringify(localStorage, null, 2) 
+                : "No local storage data.";
+            document.getElementById('local-storage').textContent = localStorageData;
+
+            // Display Session Storage
+            const sessionStorageData = sessionStorage.length 
+                ? JSON.stringify(sessionStorage, null, 2) 
+                : "No session storage data.";
+            document.getElementById('session-storage').textContent = sessionStorageData;
         }
-        // Display Cookies
-        document.getElementById('cookies').textContent = document.cookie || "No cookies set for this site.";
 
-        // Display Local Storage
-        const localStorageData = localStorage.length 
-            ? JSON.stringify(localStorage, null, 2) 
-            : "No local storage data.";
-        document.getElementById('local-storage').textContent = localStorageData;
+        function showBrowserInfo() {
+            const browserInfo = `
+                User Agent: ${navigator.userAgent}
+                Platform: ${navigator.platform}
+                Language: ${navigator.language}
+                Cookies Enabled: ${navigator.cookieEnabled}
+                Online: ${navigator.onLine}
+                Screen Resolution: ${screen.width} x ${screen.height}
+                Color Depth: ${screen.colorDepth}
+                Pixel Depth: ${screen.pixelDepth}
+            `;
+            document.getElementById('browser-info').textContent = browserInfo;
+        }
 
-        // Display Session Storage
-        const sessionStorageData = sessionStorage.length 
-            ? JSON.stringify(sessionStorage, null, 2) 
-            : "No session storage data.";
-        document.getElementById('session-storage').textContent = sessionStorageData;
-
-        // Display Browser and Device Information
-        const browserInfo = `
-            User Agent: ${navigator.userAgent}
-            Platform: ${navigator.platform}
-            Language: ${navigator.language}
-            Cookies Enabled: ${navigator.cookieEnabled}
-            Online: ${navigator.onLine}
-            Screen Resolution: ${screen.width} x ${screen.height}
-            Color Depth: ${screen.colorDepth}
-            Pixel Depth: ${screen.pixelDepth}
-        `;
-        document.getElementById('browser-info').textContent = browserInfo;
+        // Initialize all displays
+        showGeolocation();
+        showBatteryStatus();
+        showNetworkInfo();
+        showStorageInfo();
+        showBrowserInfo();
     </script>
 </body>
 </html>
