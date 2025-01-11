@@ -32,8 +32,15 @@ class MapManager {
     }
 
     addLocationMarker(location, events) {
-        console.log('Adding marker at:', location, 'with events:', events);
-        const marker = L.marker([location.lat, location.lng])
+        const color = this.locationColors[`${location.lng},${location.lat}`];
+        const marker = L.marker([location.lat, location.lng], {
+            icon: L.divIcon({
+                html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+                className: 'custom-div-icon',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            })
+        })
             .bindPopup(
                 `<div class="popup-content">` +
                 events.map(event => `
