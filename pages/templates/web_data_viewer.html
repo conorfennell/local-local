@@ -126,9 +126,31 @@
             }
         }
 
+        function parseCookies() {
+            const cookieObj = {};
+            const cookies = document.cookie.split(';');
+            
+            if (!cookies[0]) {
+                return null;
+            }
+
+            for (const cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                try {
+                    cookieObj[name] = decodeURIComponent(value);
+                } catch (e) {
+                    cookieObj[name] = value;
+                }
+            }
+            return cookieObj;
+        }
+
         function showStorageInfo() {
             // Display Cookies
-            document.getElementById('cookies').textContent = document.cookie || "No cookies set for this site.";
+            const cookies = parseCookies();
+            document.getElementById('cookies').textContent = cookies 
+                ? JSON.stringify(cookies, null, 2)
+                : "No cookies set for this site.";
 
             // Display Local Storage
             const localStorageData = localStorage.length 
