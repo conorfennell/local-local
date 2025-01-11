@@ -254,12 +254,9 @@
             mapManager.clearMarkers();
             
             const futureLocations = {};
-            console.log('Current time:', now);
             events.forEach(event => {
                 const eventTime = new Date(event.start_time);
-                console.log('Event:', event.name, 'Time:', eventTime);
                 if (eventTime > now) {
-                    console.log('Future event found:', event.name);
                     const key = `${event.longitude},${event.latitude}`;
                     if (!futureLocations[key]) {
                         futureLocations[key] = {
@@ -280,9 +277,7 @@
             });
 
             const locations = Object.values(futureLocations);
-            console.log('Future locations:', locations);
             locations.forEach(location => {
-                console.log('Adding marker for location:', location);
                 mapManager.addLocationMarker(location, location.events);
             });
         }
