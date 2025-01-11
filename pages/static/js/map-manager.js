@@ -35,10 +35,49 @@ class MapManager {
         const color = this.locationColors[`${location.lng},${location.lat}`];
         const marker = L.marker([location.lat, location.lng], {
             icon: L.divIcon({
-                html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+                html: `
+                    <div class="marker-pin">
+                        <div style="position: relative;">
+                            <div style="width: 24px; height: 24px; position: relative;">
+                                <div style="
+                                    background-color: ${color};
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 50% 50% 50% 0;
+                                    transform: rotate(-45deg);
+                                    box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+                                    border: 2px solid white;
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                "></div>
+                                <div style="
+                                    width: 8px;
+                                    height: 8px;
+                                    background: white;
+                                    border-radius: 50%;
+                                    position: absolute;
+                                    top: 8px;
+                                    left: 8px;
+                                    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+                                "></div>
+                            </div>
+                            <div style="
+                                width: 24px;
+                                height: 6px;
+                                background: rgba(0,0,0,0.15);
+                                border-radius: 50%;
+                                position: absolute;
+                                bottom: -3px;
+                                left: 0;
+                                filter: blur(2px);
+                            "></div>
+                        </div>
+                    </div>
+                `,
                 className: 'custom-div-icon',
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
+                iconSize: [24, 32],
+                iconAnchor: [12, 32]
             })
         })
             .bindPopup(
@@ -79,10 +118,49 @@ class MapManager {
     createEventMarker(coords, color, title, startTime) {
         const marker = L.marker(coords, {
             icon: L.divIcon({
-                html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+                html: `
+                    <div class="marker-pin">
+                        <div style="position: relative;">
+                            <div style="width: 24px; height: 24px; position: relative;">
+                                <div style="
+                                    background-color: ${color};
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 50% 50% 50% 0;
+                                    transform: rotate(-45deg);
+                                    box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+                                    border: 2px solid white;
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                "></div>
+                                <div style="
+                                    width: 8px;
+                                    height: 8px;
+                                    background: white;
+                                    border-radius: 50%;
+                                    position: absolute;
+                                    top: 8px;
+                                    left: 8px;
+                                    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+                                "></div>
+                            </div>
+                            <div style="
+                                width: 24px;
+                                height: 6px;
+                                background: rgba(0,0,0,0.15);
+                                border-radius: 50%;
+                                position: absolute;
+                                bottom: -3px;
+                                left: 0;
+                                filter: blur(2px);
+                            "></div>
+                        </div>
+                    </div>
+                `,
                 className: 'custom-div-icon',
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
+                iconSize: [24, 32],
+                iconAnchor: [12, 32]
             })
         }).bindPopup(`<strong>${title}</strong><br>${new Date(startTime).toLocaleString()}`);
         
