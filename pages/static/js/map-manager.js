@@ -32,6 +32,7 @@ class MapManager {
     }
 
     addLocationMarker(location, events) {
+        console.log('Adding marker at:', location, 'with events:', events);
         const marker = L.marker([location.lat, location.lng])
             .bindPopup(
                 `<div class="popup-content">` +
