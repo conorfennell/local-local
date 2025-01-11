@@ -211,10 +211,10 @@
                 }
             })),
             eventClick: function(info) {
-                const coords = [info.event.extendedProps.longitude, info.event.extendedProps.latitude];
+                const coords = [info.event.extendedProps.latitude, info.event.extendedProps.longitude];
                 mapManager.setView(coords, 15);
                 mapManager.clearMarkers();
-                const color = locationColors[coords.join(',')];
+                const color = locationColors[`${info.event.extendedProps.longitude},${info.event.extendedProps.latitude}`];
                 const marker = mapManager.createEventMarker(
                     coords,
                     color,
