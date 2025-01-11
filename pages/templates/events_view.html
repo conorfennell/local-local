@@ -256,8 +256,8 @@
                     const key = `${event.longitude},${event.latitude}`;
                     if (!futureLocations[key]) {
                         futureLocations[key] = {
-                            lat: event.longitude,
-                            lng: event.latitude,
+                            lat: event.latitude,
+                            lng: event.longitude,
                             events: []
                         };
                     }
@@ -269,7 +269,7 @@
                 location.events.sort((a, b) => 
                     new Date(a.start_time) - new Date(b.start_time)
                 );
-                addLocationMarker(location, location.events.splice(0, 1));
+                mapManager.addLocationMarker(location, location.events.splice(0, 1));
             });
         }
 
@@ -289,8 +289,8 @@
                     const key = `${event.longitude},${event.latitude}`;
                     if (!currentLocations[key]) {
                         currentLocations[key] = {
-                            lat: event.longitude,
-                            lng: event.latitude,
+                            lat: event.latitude,
+                            lng: event.longitude,
                             events: []
                         };
                     }
@@ -299,7 +299,7 @@
             });
 
             Object.values(currentLocations).forEach(location => {
-                addLocationMarker(location, location.events);
+                mapManager.addLocationMarker(location, location.events);
             });
         }
 
