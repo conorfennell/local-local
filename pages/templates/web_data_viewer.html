@@ -30,6 +30,11 @@
     </style>
 </head>
 <body>
+    <div id="eye">
+        <div class="eye-outer">
+            <div class="eye-inner"></div>
+        </div>
+    </div>
     <h1>Educational Web Data Viewer</h1>
     <p>This page demonstrates what types of browser data websites can access. All information stays local and is not sent anywhere.</p>
 
@@ -69,6 +74,36 @@
     </div>
 
     <style>
+        #eye {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .eye-outer {
+            width: 60px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .eye-inner {
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+
         .box {
             margin-bottom: 20px;
             padding: 15px;
@@ -185,6 +220,25 @@
         showNetworkInfo();
         showStorageInfo();
         showBrowserInfo();
+
+        // Eye following cursor
+        document.addEventListener('mousemove', (e) => {
+            const eye = document.querySelector('.eye-inner');
+            const eyeRect = document.querySelector('.eye-outer').getBoundingClientRect();
+            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+            
+            // Calculate angle between cursor and eye center
+            const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+            
+            // Calculate pupil position (limited movement radius)
+            const radius = 10;
+            const pupilX = Math.cos(angle) * radius;
+            const pupilY = Math.sin(angle) * radius;
+            
+            // Apply transformation
+            eye.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
+        });
     </script>
 </body>
 </html>
