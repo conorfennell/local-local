@@ -72,14 +72,13 @@ class MapManager {
     createEventMarker(coords, color, title, startTime) {
         const marker = L.marker(coords, {
             icon: L.divIcon({
-                html: `<i class="fas fa-map-marker-alt fa-3x" style="color: ${color};"></i>`,
+                html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
                 className: 'custom-div-icon',
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
             })
         }).bindPopup(`<strong>${title}</strong><br>${new Date(startTime).toLocaleString()}`);
         
-        this.markers.addLayer(marker);
         return marker;
     }
 }
