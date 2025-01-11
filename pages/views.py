@@ -42,15 +42,18 @@ def events_view(request):
     return render(request, 'events_view.html', context)
 
 
+class CommitInfo:
+    @staticmethod
+    def get_commit_info():
+        return {
+            'commit_id': os.getenv('COMMIT_ID', 'Unknown'),
+            'commit_time': os.getenv('COMMIT_TIME', 'Unknown'), 
+            'commit_message': os.getenv('COMMIT_MESSAGE', 'Unknown')
+        }
+
 def about_view(request):
-    commit_id = os.getenv('COMMIT_ID', 'Unknown')
-    commit_time = os.getenv('COMMIT_TIME', 'Unknown')
-    commit_message = os.getenv('COMMIT_MESSAGE', 'Unknown')
-    return render(request, 'about.html', {
-        'commit_id': commit_id,
-        'commit_time': commit_time,
-        'commit_message': commit_message
-    })
+    commit_info = CommitInfo.get_commit_info()
+    return render(request, 'about.html', commit_info)
 
 def web_data_viewer(request):
     template = loader.get_template('web_data_viewer.html')
