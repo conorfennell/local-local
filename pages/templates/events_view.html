@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -169,38 +170,21 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="{% static 'js/map-manager.js' %}"></script>
     <script>
-        // Your existing JavaScript code here
         {% autoescape off %}
         const events = {{ events }};
         {% endautoescape %}
         
-        // Initialize map
-        const map = L.map('map').setView([53.37743855202611, -6.378832062945247], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap contributors, © CARTO'
-        }).addTo(map);
-
-        const markers = L.layerGroup().addTo(map);
-
-        // Function to generate a random color
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
-        // Assign colors to each location
-        const locationColors = {};
-        events.forEach(event => {
-            const key = `${event.longitude},${event.latitude}`;
-            if (!locationColors[key]) {
-                locationColors[key] = getRandomColor();
-            }
-        });
+        // Initialize MapManager
+        const mapManager = new MapManager(
+            'map',
+            [53.37743855202611, -6.378832062945247],
+            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+        );
+        
+        // Generate location colors
+        const locationColors = mapManager.generateLocationColors(events);
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -223,18 +207,16 @@
                 }
             })),
             eventClick: function(info) {
-                map.setView([info.event.extendedProps.longitude, info.event.extendedProps.latitude], 15);
-                markers.clearLayers();
-                const marker = L.marker([info.event.extendedProps.longitude, info.event.extendedProps.latitude], {
-                    icon: L.divIcon({
-                        html: `<i class="fas fa-map-marker-alt fa-3x" style="color: ${locationColors[info.event.extendedProps.longitude + ',' + info.event.extendedProps.latitude]};"></i>`,
-                        className: 'custom-div-icon',
-                        iconSize: [30, 42],
-                        iconAnchor: [15, 42]
-                    })
-                })
-                    .bindPopup(`<strong>${info.event.title}</strong><br>${info.event.start.toLocaleString()}`);
-                markers.addLayer(marker);
+                const coords = [info.event.extendedProps.longitude, info.event.extendedProps.latitude];
+                mapManager.setView(coords, 15);
+                mapManager.clearMarkers();
+                const color = locationColors[coords.join(',')];
+                const marker = mapManager.createEventMarker(
+                    coords,
+                    color,
+                    info.event.title,
+                    info.event.start
+                );
                 marker.openPopup();
             }
         });
@@ -260,31 +242,12 @@
             }
         }
 
-        function clearMarkers() {
-            markers.clearLayers();
-        }
-
-        function addLocationMarker(location, events) {
-            const marker = L.marker([location.lat, location.lng])
-                .bindPopup(
-                    `<div class="popup-content">` +
-                    events.map(event => `
-                        <div class="event-popup">
-                            <strong>${event.name}</strong>
-                            <div>${formatEventTime(event.start_time)}</div>
-                        </div>
-                    `).join('<hr>') +
-                    `</div>`
-                );
-            markers.addLayer(marker);
-        }
-
         function showNextEvents() {
             const now = new Date();
             document.getElementById('currentTime').textContent = 
                 `Current Time: ${now.toLocaleString()}`;
             
-            clearMarkers();
+            mapManager.clearMarkers();
             
             const futureLocations = {};
             events.forEach(event => {
@@ -315,7 +278,7 @@
             document.getElementById('currentTime').textContent = 
                 `Current Time: ${now.toLocaleString()}`;
             
-            clearMarkers();
+            mapManager.clearMarkers();
             
             const currentLocations = {};
             events.forEach(event => {
