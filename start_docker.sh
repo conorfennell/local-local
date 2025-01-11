@@ -21,5 +21,8 @@ else
         echo "Neither podman nor docker is running. Please install/start one of them and try again."
         exit 1
     fi
-    docker compose --env-file .env up --build
+    # Use buildkit and cache options for faster builds
+    export DOCKER_BUILDKIT=1
+    export COMPOSE_DOCKER_CLI_BUILD=1
+    docker compose --env-file .env up --build --build-arg BUILDKIT_INLINE_CACHE=1
 fi
