@@ -11,11 +11,15 @@ echo "COMMIT_ID=$COMMIT_ID" > .env
 echo "COMMIT_TIME=$COMMIT_TIME" >> .env
 echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> .env
 
-# Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "Docker is not running. Please start Docker and try again."
-    exit 1
+# Check for podman
+if podman info > /dev/null 2>&1; then
+    echo "Using podman compose"
+    podman compose --env-file .env up --build
+else
+    # If podman isn't available, check for docker
+    if ! docker info > /dev/null 2>&1; then
+        echo "Neither podman nor docker is running. Please install/start one of them and try again."
+        exit 1
+    fi
+    docker compose --env-file .env up --build
 fi
-
-# Build and start the Docker Compose services using the .env file
-docker compose --env-file .env up --build
