@@ -4,43 +4,50 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
 import json
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 def load_json_file(file_path):
     """
     Loads JSON data from a file.
-
-    Args:
-        file_path (str): The path to the JSON file.
-
-    Returns:
-        dict or list: The parsed JSON data.
     """
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
-            logger.info("Data loaded successfully!")
+            logger.info(f"Successfully loaded data from {file_path}")
             return data
     except FileNotFoundError:
-        logger.error(f"The file '{file_path}' was not found.")
+        logger.error(f"File not found: {file_path}")
     except json.JSONDecodeError as e:
-        logger.error(f"Error decoding JSON: {e}")
+        logger.error(f"Error decoding JSON from {file_path}: {e}")
     return None
 
-
 def events_view(request):
+    """
+    Load all JSON files from the extraction directory and combine their events.
+    """
     events = []
-    for file_path in ["./extraction/d15t3pn.json", "./extraction/d15p954.json", "./extraction/d15ca4v.json"]:
-        data = load_json_file(file_path)
+    extraction_dir = Path('./extraction')
+    
+    # Ensure the extraction directory exists
+    if not extraction_dir.exists():
+        logger.warning("Extraction directory does not exist")
+        return render(request, 'events_view.html', {'events': json.dumps([])})
+    
+    # Load all JSON files from the extraction directory
+    json_files = extraction_dir.glob('*.json')
+    for json_file in json_files:
+        data = load_json_file(json_file)
         if data:
             events.extend(data)
+            logger.info(f"Added {len(data)} events from {json_file.name}")
+    
     context = {
         'events': json.dumps(events)
     }
-    print(context)
+    logger.info(f"Total events loaded: {len(events)}")
     return render(request, 'events_view.html', context)
-
 
 class CommitInfo:
     @staticmethod
