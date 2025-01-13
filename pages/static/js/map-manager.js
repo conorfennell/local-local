@@ -86,6 +86,7 @@ class MapManager {
                     <div class="event-popup">
                         <strong>${event.name}</strong>
                         <div>${this.formatEventTime(event.start_time)}</div>
+                        <div><a href="${event.extracted_url}" target="_blank">View Source</a></div>
                     </div>
                 `).join('<hr>') +
                 `</div>`
@@ -162,7 +163,11 @@ class MapManager {
                 iconSize: [24, 32],
                 iconAnchor: [12, 32]
             })
-        }).bindPopup(`<strong>${title}</strong><br>${new Date(startTime).toLocaleString()}`);
+        }).bindPopup(`
+            <strong>${title}</strong><br>
+            ${new Date(startTime).toLocaleString()}<br>
+            <a href="${event.extracted_url}" target="_blank">View Source</a>
+        `);
         
         return marker;
     }

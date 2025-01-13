@@ -207,7 +207,8 @@
                 borderColor: locationColors[`${event.longitude},${event.latitude}`],
                 extendedProps: {
                     longitude: event.longitude,
-                    latitude: event.latitude
+                    latitude: event.latitude,
+                    extracted_url: event.extracted_url
                 }
             })),
             eventClick: function(info) {
@@ -219,7 +220,8 @@
                     coords,
                     color,
                     info.event.title,
-                    info.event.start
+                    info.event.start,
+                    info.event.extendedProps.extracted_url
                 );
                 mapManager.markers.addLayer(marker);
                 marker.openPopup();
