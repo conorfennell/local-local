@@ -20,7 +20,7 @@ class LaurelLodgeParser:
         text = re.sub(r'\s+', ' ', text.strip())
         return text
 
-    def _parse_time(self, time_str: str, day_name: str = None) -> str:
+    def _parse_time(self, time_str: str) -> str:
         """Convert time string to ISO format."""
         # Handle special cases
         if time_str.lower() == "vigil":
@@ -36,86 +36,113 @@ class LaurelLodgeParser:
             else:
                 time_obj = datetime.strptime(time_str, "%I%p")
                 
-            # Get current date
-            today = datetime.now()
+            # Get next occurrence of this time
+            now = datetime.now()
+            target_time = datetime.combine(now.date(), time_obj.time())
             
-            # If day_name is provided, adjust the date to the next occurrence of that day
-            if day_name:
-                # Convert day name to weekday number (0 = Monday, 6 = Sunday)
-                day_map = {
-                    'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 
-                    'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6
-                }
-                target_day = day_map[day_name]
-                current_day = today.weekday()
-                days_ahead = target_day - current_day
+            # If the time has already passed today, move to tomorrow
+            if target_time <= now:
+                target_time += timedelta(days=1)
                 
-                if days_ahead <= 0:  # Target day has passed this week
-                    days_ahead += 7
-                    
-                target_date = today + timedelta(days=days_ahead)
-                datetime_obj = datetime.combine(target_date.date(), time_obj.time())
-            else:
-                datetime_obj = datetime.combine(today.date(), time_obj.time())
-                
-            return datetime_obj.strftime('%Y-%m-%dT%H:%M:00Z')
+            return target_time.strftime('%Y-%m-%dT%H:%M:00Z')
+            
         except Exception as e:
             logger.error(f"Error parsing time {time_str}: {e}")
             return None
+
+    def _create_event(self, name: str, time_str: str, pattern: str = "Weekly") -> dict:
+        """Create an event dictionary."""
+        time_iso = self._parse_time(time_str)  # Removed the days parameter here
+        if not time_iso:
+            return None
+            
+        return {
+            "name": f"{name} ({time_str})",
+            "start_time": time_iso,
+            "extracted_time": self.extracted_time,
+            "extracted_url": self.venue_config["url"],
+            "duration": "PT1H0M",
+            "recurrence": pattern,
+            "eircode": self.venue_config["eircode"],
+            "longitude": self.venue_config["longitude"],
+            "latitude": self.venue_config["latitude"]
+        }
 
     def get_mass_schedule(self) -> list:
         """Extract mass schedule from the page."""
         events = []
         
-        # Find the main content
         content = self.soup.find('div', {'itemprop': 'articleBody'})
         if not content:
             logger.error("Could not find main content")
             return events
 
-        # Extract text content
         text = content.get_text()
         
-        # Regular expressions for different mass times
+        # Regular expressions with named groups for better clarity
         patterns = {
-            r'Monday to Friday:\s*(?:at\s*)?(\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
-                'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                'name': 'Weekday Mass'
+            # Weekday masses
+            r'Monday to Friday:\s*(?:at\s*)?(?P<time>\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
+                'name': 'Weekday Mass',
+                'days': ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
             },
-            r'Saturday Vigil Mass:\s*(?:at\s*)?(\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
-                'days': ['Saturday'],
-                'name': 'Vigil Mass'
+            # Saturday vigil
+            r'Saturday Vigil Mass:\s*(?:at\s*)?(?P<time>\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
+                'name': 'Vigil Mass',
+                'days': ['SATURDAY']
             },
-            r'Sunday Masses:\s*(?:at\s*)?(\d{1,2}(?::\d{2})?\s*(?:am|pm))(?:\s*and\s*)?(\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
-                'days': ['Sunday'],
-                'name': 'Sunday Mass'
+            # Sunday masses (with two times)
+            r'Sunday Masses:\s*(?:at\s*)?(?P<time1>\d{1,2}(?::\d{2})?\s*(?:am|pm))(?:\s*and\s*)(?P<time2>\d{1,2}(?::\d{2})?\s*(?:am|pm))': {
+                'name': 'Sunday Mass',
+                'days': ['SUNDAY']
             }
         }
 
-        # Process each pattern
+        # Look for special/one-off masses
+        special_mass_pattern = r'(?P<date>\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December))\s*(?:at\s*)?(?P<time>\d{1,2}(?::\d{2})?\s*(?:am|pm))'
+        special_masses = re.finditer(special_mass_pattern, text)
+        
+        # Process regular weekly masses
         for pattern, info in patterns.items():
-            matches = re.findall(pattern, text)
-            if matches:
-                if isinstance(matches[0], tuple):  # Multiple times (e.g., Sunday)
-                    times = matches[0]
-                else:  # Single time
-                    times = [matches[0]]
+            match = re.search(pattern, text)
+            if match:
+                if 'time1' in match.groupdict():  # Handle Sunday masses with two times
+                    # First Sunday mass
+                    event = self._create_event(
+                        info['name'],
+                        match.group('time1'),
+                        info['days']
+                    )
+                    if event:
+                        events.append(event)
+                    
+                    # Second Sunday mass
+                    event = self._create_event(
+                        info['name'],
+                        match.group('time2'),
+                        info['days']
+                    )
+                    if event:
+                        events.append(event)
+                else:
+                    event = self._create_event(
+                        info['name'],
+                        match.group('time'),
+                        info['days']
+                    )
+                    if event:
+                        events.append(event)
 
-                for time_str in times:
-                    for day in info['days']:
-                        time_iso = self._parse_time(time_str, day)
-                        if time_iso:
-                            events.append({
-                                "name": f"{info['name']} ({time_str})",
-                                "start_time": time_iso,
-                                "extracted_time": self.extracted_time,
-                                "extracted_url": self.venue_config["url"],
-                                "duration": "PT1H0M",  # Standard 1-hour duration
-                                "recurrence": "Weekly",
-                                "eircode": self.venue_config["eircode"],
-                                "longitude": self.venue_config["longitude"],
-                                "latitude": self.venue_config["latitude"]
-                            })
+        # Process special/one-off masses
+        for match in special_masses:
+            event = self._create_event(
+                'Special Mass',
+                match.group('time'),
+                None,
+                "ONCE"
+            )
+            if event:
+                events.append(event)
 
         return events
 
