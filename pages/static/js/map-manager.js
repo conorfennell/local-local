@@ -116,7 +116,7 @@ class MapManager {
         this.map.setView(coords, zoom);
     }
 
-    createEventMarker(coords, color, title, startTime) {
+    createEventMarker(coords, color, title, startTime, extracted_url) {
         const marker = L.marker(coords, {
             icon: L.divIcon({
                 html: `
@@ -166,7 +166,7 @@ class MapManager {
         }).bindPopup(`
             <strong>${title}</strong><br>
             ${new Date(startTime).toLocaleString()}<br>
-            <a href="${event.extracted_url}" target="_blank">View Source</a>
+            <a href="${extracted_url}" target="_blank">View Source</a>
         `);
         
         return marker;
