@@ -113,12 +113,6 @@
             background: #e5e7eb;
         }
 
-        #currentTime {
-            margin-left: auto;
-            color: #6b7280;
-            font-size: 0.95rem;
-        }
-
         .fc-event {
             cursor: pointer;
         }
@@ -142,11 +136,6 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-
-            #currentTime {
-                margin: 0;
-                text-align: center;
-            }
         }
     </style>
 </head>
@@ -163,7 +152,6 @@
             <button onclick="showNextEvents()" class="btn-secondary">
                 Next
             </button>
-            <span id="currentTime"></span>
         </div>
 
         <div class="content-wrapper">
@@ -250,9 +238,6 @@
 
         function showNextEvents() {
             const now = new Date();
-            document.getElementById('currentTime').textContent = 
-                `Current Time: ${now.toLocaleString()}`;
-            
             mapManager.clearMarkers();
             
             const futureLocations = {};
@@ -286,9 +271,6 @@
 
         function showCurrentEvents() {
             const now = new Date();
-            document.getElementById('currentTime').textContent = 
-                `Current Time: ${now.toLocaleString()}`;
-            
             mapManager.clearMarkers();
             
             const currentLocations = {};
