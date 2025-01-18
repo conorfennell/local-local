@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daylight Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daylight Calculator</h1>
+    <div id="result"></div>
+
+    <script>
+        function suntimes(lat, lng, tz) {
+            var d = new Date();
+            var radians = Math.PI / 180.0;
+            var degrees = 180.0 / Math.PI;
+
+            var a = Math.floor((14 - (d.getMonth() + 1.0)) / 12);
+            var y = d.getFullYear() + 4800 - a;
+            var m = (d.getMonth() + 1) + 12 * a - 3;
+
+            var j_day = d.getDate() + Math.floor((153 * m + 2)/5) + 
+                       365 * y + Math.floor(y/4) - Math.floor(y/100) + 
+                       Math.floor(y/400) - 32045;
+
+            var n_star = j_day - 2451545.0009 - lng / 360.0;
+            var n = Math.floor(n_star + 0.5);
+            var solar_noon = 2451545.0009 - lng / 360.0 + n;
+
+            var M = 356.0470 + 0.9856002585 * n;
+            var C = 1.9148 * Math.sin(M * radians) + 
+                   0.02 * Math.sin(2 * M * radians) + 
+                   0.0003 * Math.sin(3 * M * radians);
+            var L = (M + 102.9372 + C + 180) % 360;
+
+            var j_transit = solar_noon + 
+                          0.0053 * Math.sin(M * radians) - 
+                          0.0069 * Math.sin(2 * L * radians);
+
+            var D = Math.asin(Math.sin(L * radians) * 
+                   Math.sin(23.45 * radians)) * degrees;
+
+            var cos_omega = (Math.sin(-0.83 * radians) - 
+                           Math.sin(lat * radians) * Math.sin(D * radians)) / 
+                           (Math.cos(lat * radians) * Math.cos(D * radians));
+
+            // Sun never rises
+            if (cos_omega > 1) return [null, -1];
+            // Sun never sets
+            if (cos_omega < -1) return [-1, null];
+
+            var omega = Math.acos(cos_omega) * degrees;
+            var j_set = j_transit + omega / 360.0;
+            var j_rise = j_transit - omega / 360.0;
+
+            var utc_time_set = 24 * (j_set - j_day) + 12;
+            var utc_time_rise = 24 * (j_rise - j_day) + 12;
+
+            var tz_offset = tz === undefined ? 
+                          -1 * d.getTimezoneOffset() / 60 : tz;
+
+            var local_rise = (utc_time_rise + tz_offset) % 24;
+            var local_set = (utc_time_set + tz_offset) % 24;
+
+            return [local_rise, local_set];
+        }
+
+        function decimalToTime(decimal) {
+            const hours = Math.floor(decimal);
+            const minutes = Math.floor((decimal - hours) * 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            const latitude = 53.3280479;
+            const longitude = -6.2863272;
+            
+            const [sunrise, sunset] = suntimes(latitude, longitude);
+            
+            if (sunrise === null) {
+                document.getElementById('result').innerHTML = '<p>The sun never rises today at this location.</p>';
+                return;
+            }
+            if (sunset === null) {
+                document.getElementById('result').innerHTML = '<p>The sun never sets today at this location.</p>';
+                return;
+            }
+
+            const now = new Date();
+            const currentDecimalTime = now.getHours() + now.getMinutes() / 60;
+
+            // Calculate total daylight hours
+            let dayLength;
+            if (sunset < sunrise) {
+                dayLength = (24 - sunrise) + sunset;
+            } else {
+                dayLength = sunset - sunrise;
+            }
+            
+            const totalHours = Math.floor(dayLength);
+            const totalMinutes = Math.round((dayLength - totalHours) * 60);
+
+            // Calculate remaining daylight
+            let remainingText = '';
+            if (currentDecimalTime < sunrise) {
+                remainingText = "Sun hasn't risen yet";
+            } else if (currentDecimalTime > sunset) {
+                remainingText = "Sun has set for today";
+            } else {
+                let remaining;
+                if (sunset < currentDecimalTime) {
+                    remaining = (24 - currentDecimalTime) + sunset;
+                } else {
+                    remaining = sunset - currentDecimalTime;
+                }
+                const remainingHours = Math.floor(remaining);
+                const remainingMinutes = Math.round((remaining - remainingHours) * 60);
+                remainingText = `${remainingHours} hours and ${remainingMinutes} minutes of daylight remaining`;
+            }
+
+            document.getElementById('result').innerHTML = `
+                <h2>${totalHours} hours and ${totalMinutes} minutes</h2>
+                <p>of total daylight today</p>
+                <p>Sunrise: ${decimalToTime(sunrise)}</p>
+                <p>Sunset: ${decimalToTime(sunset)}</p>
+                <div class="time-remaining">
+                    ${remainingText}
+                </div>
+                <div style="margin-top: 20px">
+                    Current time: ${decimalToTime(currentDecimalTime)}
+                </div>
+            `;
+        }
+
+        // Update immediately and then every minute
+        updateDisplay();
+        setInterval(updateDisplay, 60000);
+    </script>
+</body>
+</html>

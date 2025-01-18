@@ -8,6 +8,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+def local_view(request):
+    return render(request, 'local.html')
+
 def load_json_file(file_path):
     """
     Loads JSON data from a file.
