@@ -8,6 +8,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+def breathe_view(request):
+    return render(request, 'breathe.html')
+
 def local_view(request):
     return render(request, 'local.html')
 
