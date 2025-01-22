@@ -81,15 +81,57 @@ class MapManager {
             })
         })
             .bindPopup(
-                `<div class="popup-content">` +
+                `<div class="popup-content" style="
+                    min-width: 250px;
+                    max-width: 300px;
+                    padding: 12px;
+                    font-family: 'Inter', sans-serif;
+                ">` +
                 events.map(event => `
-                    <div class="event-popup">
-                        <strong>${event.name}</strong>
-                        <div>${this.formatEventTime(event.start_time)}</div>
-                        <div><a href="${event.extracted_url}" target="_blank">View Source</a></div>
+                    <div class="event-popup" style="
+                        background: white;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                    ">
+                        <div style="
+                            padding: 8px;
+                            border-left: 4px solid ${color};
+                            background: rgba(0,0,0,0.02);
+                        ">
+                            <h3 style="
+                                color: #2d3748;
+                                font-size: 16px;
+                                font-weight: 600;
+                                margin-bottom: 8px;
+                            ">${event.name}</h3>
+                            <div style="
+                                color: #4a5568;
+                                font-size: 14px;
+                                margin-bottom: 8px;
+                            ">${this.formatEventTime(event.start_time)}</div>
+                            <a href="${event.extracted_url}" 
+                               target="_blank"
+                               style="
+                                display: inline-block;
+                                padding: 6px 12px;
+                                background: ${color};
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 4px;
+                                font-size: 13px;
+                                font-weight: 500;
+                                transition: opacity 0.2s;
+                            "
+                               onmouseover="this.style.opacity='0.8'"
+                               onmouseout="this.style.opacity='1'"
+                            >View Source</a>
+                        </div>
                     </div>
-                `).join('<hr>') +
-                `</div>`
+                `).join('') +
+                `</div>`,
+                {
+                    className: 'custom-popup'
+                }
             );
         this.markers.addLayer(marker);
     }
@@ -164,10 +206,54 @@ class MapManager {
                 iconAnchor: [12, 32]
             })
         }).bindPopup(`
-            <strong>${title}</strong><br>
-            ${new Date(startTime).toLocaleString()}<br>
-            <a href="${extracted_url}" target="_blank">View Source</a>
-        `);
+            <div class="popup-content" style="
+                min-width: 250px;
+                max-width: 300px;
+                padding: 12px;
+                font-family: 'Inter', sans-serif;
+            ">
+                <div class="event-popup" style="
+                    background: white;
+                    border-radius: 8px;
+                ">
+                    <div style="
+                        padding: 8px;
+                        border-left: 4px solid ${color};
+                        background: rgba(0,0,0,0.02);
+                    ">
+                        <h3 style="
+                            color: #2d3748;
+                            font-size: 16px;
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                        ">${title}</h3>
+                        <div style="
+                            color: #4a5568;
+                            font-size: 14px;
+                            margin-bottom: 8px;
+                        ">${this.formatEventTime(startTime)}</div>
+                        <a href="${extracted_url}" 
+                           target="_blank"
+                           style="
+                            display: inline-block;
+                            padding: 6px 12px;
+                            background: ${color};
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 4px;
+                            font-size: 13px;
+                            font-weight: 500;
+                            transition: opacity 0.2s;
+                        "
+                           onmouseover="this.style.opacity='0.8'"
+                           onmouseout="this.style.opacity='1'"
+                        >View Source</a>
+                    </div>
+                </div>
+            </div>
+        `, {
+            className: 'custom-popup'
+        });
         
         return marker;
     }
